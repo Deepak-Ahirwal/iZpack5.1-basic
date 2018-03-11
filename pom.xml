@@ -1,0 +1,179 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.izpack.example</groupId>
+	<artifactId>izpack5.1-example</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<izpack.version>5.1.2</izpack.version>
+		<staging.dir>${project.build.directory}/staging</staging.dir>
+		<installer-output-filename>example-installer.jar</installer-output-filename>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.codehaus.izpack</groupId>
+			<artifactId>izpack-maven-plugin</artifactId>
+			<version>${izpack.version}</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<defaultGoal>install</defaultGoal>
+
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.codehaus.izpack</groupId>
+					<artifactId>izpack-maven-plugin</artifactId>
+					<version>${izpack.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-clean-plugin</artifactId>
+					<version>3.0.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>2.8.2</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-install-plugin</artifactId>
+					<version>2.5.2</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>3.7</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<encoding>${project.build.sourceEncoding}</encoding>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-resources</id>
+						<!-- here the phase you need -->
+						<phase>validate</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${staging.dir}</outputDirectory>
+							<!-- recursive copy of all resource under src/main/izpack. this is 
+								the stuff to install as well as install.xml and panel data and such -->
+							<resources>
+								<resource>
+									<directory>src/izpack</directory>
+									<includes>
+										<include>**/*</include>
+									</includes>
+									<filtering>false</filtering>
+								</resource>
+
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- We need to tell the izpack-maven-plugin what to use as the base directory 
+				(this is our staging area), and also tell it the install file to use: -->
+			<plugin>
+				<groupId>org.codehaus.izpack</groupId>
+				<artifactId>izpack-maven-plugin</artifactId>
+				<version>${izpack.version}</version>
+				<configuration>
+					<descriptorEncoding>UTF-8</descriptorEncoding>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>izpack</goal>
+						</goals>
+						<configuration>
+							<!-- base for relative paths in izpack descriptor -->
+							<baseDir>${staging.dir}</baseDir>
+							<installFile>${staging.dir}/install.xml</installFile>
+							<output>${project.build.directory}/${installer-output-filename}</output>
+						</configuration>
+					</execution>
+				</executions>
+				<!-- must have a dependency here on any code used in the installer, otherwise 
+					the classloader will not find it. So in this case we need our panels and 
+					then the package that contains the base classes for the panels -->
+				<dependencies>
+					<dependency>
+						<groupId>org.codehaus.izpack</groupId>
+						<artifactId>izpack-panel</artifactId>
+						<version>${izpack.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>com.example.test.installer</groupId>
+						<artifactId>izpack-panels</artifactId>
+						<version>1.0-SNAPSHOT</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+
+			<plugin>
+				<groupId>com.akathist.maven.plugins.launch4j</groupId>
+				<artifactId>launch4j-maven-plugin</artifactId>
+				<version>1.7.21</version>
+				<executions>
+					<execution>
+						<id>l4j-gui</id>
+						<phase>package</phase>
+						<goals>
+							<goal>launch4j</goal>
+						</goals>
+						<configuration>
+							<headerType>gui</headerType>
+							<jar>target/${installer-output-filename}</jar>
+							<outfile>target/${project.artifactId}.exe</outfile>
+							<classPath>
+								<mainClass>com.izforge.izpack.installer.bootstrap.Installer</mainClass>
+							</classPath>
+							<jre>
+								<bundledJre64Bit>false</bundledJre64Bit>
+								<bundledJreAsFallback>false</bundledJreAsFallback>
+								<minVersion>1.6.0</minVersion>
+								<jdkPreference>preferJre</jdkPreference>
+								<runtimeBits>32</runtimeBits>
+							</jre>
+							<versionInfo>
+								<fileVersion>1.0.0.0</fileVersion>
+								<txtFileVersion>${project.version}</txtFileVersion>
+								<fileDescription>${project.name}</fileDescription>
+								<copyright>C</copyright>
+								<productVersion>1.0.0.0</productVersion>
+								<txtProductVersion>1.0.0.0</txtProductVersion>
+								<productName>${project.name}</productName>
+								<internalName>AppName</internalName>
+								<originalFilename>${project.artifactId}.exe</originalFilename>
+							</versionInfo>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
+	</build>
+
+</project>
