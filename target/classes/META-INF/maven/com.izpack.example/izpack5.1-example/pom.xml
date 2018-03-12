@@ -9,7 +9,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<izpack.version>5.1.2</izpack.version>
 		<staging.dir>${project.build.directory}/staging</staging.dir>
-		<installer-output-filename>example-installer.jar</installer-output-filename>
+		<installer-output-filename>izpack5.1-installer.jar</installer-output-filename>
 	</properties>
 
 	<dependencies>

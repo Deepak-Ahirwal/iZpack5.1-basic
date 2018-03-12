@@ -1,1 +1,1 @@
-$USER_HOME/izPackExample
+$USER_HOME/izPack5.1-installer

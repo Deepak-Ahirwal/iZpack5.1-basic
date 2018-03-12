@@ -1,1 +1,1 @@
-c:\izPackExample
+c:\izPack5.1-installer
