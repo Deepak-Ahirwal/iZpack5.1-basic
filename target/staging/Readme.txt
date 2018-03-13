@@ -1,1 +1,1 @@
-This is a readme for the izpack5.1 basic installer example.
+This is a read me for the izpack5.1 basic installer example.
