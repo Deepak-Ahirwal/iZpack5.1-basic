@@ -152,7 +152,7 @@
 							</classPath>
 							<jre>
 								<bundledJre64Bit>true|false</bundledJre64Bit>
-    							<bundledJreAsFallback>true|false</bundledJreAsFallback>
+								<bundledJreAsFallback>true|false</bundledJreAsFallback>
 								<minVersion>1.8.0</minVersion>
 								<jdkPreference>preferJre</jdkPreference>
 								<runtimeBits>64/32</runtimeBits>
